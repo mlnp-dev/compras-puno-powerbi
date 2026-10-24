@@ -10,6 +10,8 @@ Actividad Semana 2: Herramientas de analítica y *reporting*
 
 🔗 **Reporte en línea (público):** https://app.powerbi.com/view?r=eyJrIjoiMmJlMGJlMjQtZmU5My00YzU3LWEwZGYtMjdlNGJiZDMzNDMwIiwidCI6ImM0YTY2YzM0LTJiYjctNDUxZi04YmUxLWIyYzI2YTQzMDE1OCIsImMiOjR9
 
+📄 **Informe comparativo Shiny frente a Power BI:** [informe/Semana 2 - Informe Mary Luz Nina Palacios.pdf](informe/Semana%202%20-%20Informe%20Mary%20Luz%20Nina%20Palacios.pdf)
+
 🔗 **Versión en Shiny del mismo análisis:** https://github.com/mlnp-dev/compras-puno-shiny · https://mlnp.shinyapps.io/compras-puno/
 
 ![Resumen](capturas/powerbi/01_resumen.png)
@@ -53,6 +55,7 @@ data/compras_puno_2025_2026.csv     Órdenes de Puno preparadas en Python
 data/ref/                           Padrón RUC (ubigeo) y límites distritales
 scripts/                            Preparación de datos y generación del reporte
 capturas/powerbi/                   Capturas de las seis páginas
+informe/                            Informe en PDF y su fuente LaTeX (tectonic -X compile informe.tex)
 ```
 
 Los scripts, en orden: `01_preparar_datos.py` (filtra Puno a partir de los archivos de Perú Compras), `03_preparar_powerbi.R` (CSV para Power BI), `06_recursos_powerbi.py` (imágenes del diseño), `04_modelo_powerbi.py` (modelo y medidas) y `05_reporte_powerbi.py` (páginas del reporte).

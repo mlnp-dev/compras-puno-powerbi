@@ -6,6 +6,13 @@
 !/scripts/
 !/data/
 !/capturas/
+!/informe/
+
+# del informe solo va la versión final: PDF, fuente LaTeX e imágenes (figs2)
+/informe/*
+!/informe/informe.tex
+!/informe/figs2/
+!/informe/Semana 2 - Informe Mary Luz Nina Palacios.pdf
 
 # datos crudos de Perú Compras (pesados, se descargan de la fuente) y copia en Excel
 /data/raw/

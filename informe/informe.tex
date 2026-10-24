@@ -1,0 +1,591 @@
+% Actividad Semana 2: Shiny frente a Power BI (una columna, A4, citas APA 7)
+% Compilar:  tectonic -X compile informe.tex
+\documentclass[12pt,a4paper]{article}
+\usepackage[spanish,es-noshorthands,es-tabla,es-nodecimaldot]{babel}
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic]
+\setsansfont{texgyreheros}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic]
+\setmonofont{texgyrecursor}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic,Scale=0.95]
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{booktabs,tabularx,array,multirow}
+\usepackage[table]{xcolor}
+\usepackage{caption,subcaption}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage[round,authoryear]{natbib}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\usepackage[normalem]{ulem}
+
+\definecolor{marino}{HTML}{14213D}
+\definecolor{azul}{HTML}{2F6FED}
+\definecolor{suave}{HTML}{64748B}
+\definecolor{fondo}{HTML}{EEF2F8}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black}
+
+\onehalfspacing
+\setlength{\emergencystretch}{3em}
+\setlength{\parindent}{1.27cm}
+\setlength{\parskip}{2pt}
+\captionsetup{font=small,labelfont=bf,justification=justified,singlelinecheck=true}
+\captionsetup[figure]{name=Figura}
+\captionsetup[sub]{font=small,labelfont=bf}
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{14pt}{6pt}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+\setlist{itemsep=2pt,topsep=4pt}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Actividad Semana 2: Herramientas de analítica y \emph{reporting}}
+\fancyhead[R]{\small Shiny y Power BI}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Página de capturas: Shiny arriba y Power BI abajo
+\newcommand{\pareja}[6]{% 1 sh, 2 pbi, 3 alto shiny, 4 pie shiny, 5 pie pbi, 6 título+etiqueta
+  \begin{figure}[p]\centering
+  \begin{subfigure}{\textwidth}\centering
+    \includegraphics[height=#3,width=\textwidth,keepaspectratio]{figs2/#1}
+    \caption{#4}
+  \end{subfigure}\par\medskip
+  \begin{subfigure}{\textwidth}\centering
+    \includegraphics[width=0.97\textwidth]{figs2/#2}
+    \caption{#5}
+  \end{subfigure}
+  #6
+  \end{figure}}
+
+\raggedbottom
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{12pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
+
+% Enlaces con la letra del texto, en azul y subrayados
+\newcommand{\enlace}[2]{\href{#1}{\textcolor{blue}{#2}}}
+
+\begin{document}
+
+% =============================================================================
+\thispagestyle{plain}
+\begin{center}
+{\large\bfseries Shiny y Power BI en la analítica básica y el \emph{reporting} de datos:\\
+órdenes de compra pública de la región Puno\par}
+\vspace{10pt}
+{Mary Luz Nina Palacios\par}
+{\small Universidad Nacional del Altiplano, Escuela de Posgrado. Maestría, curso Business Intelligence and
+Data Analytics. Docente: Fred Torres Cruz\par}
+{\small Actividad Semana 2: Herramientas de analítica y \emph{reporting}. Puno, octubre de 2026\par}
+\end{center}
+\vspace{4pt}
+
+% =============================================================================
+\section*{Resumen}
+\noindent El presente informe compara Shiny y Power BI a partir de un caso real: las 5\,925 órdenes de compra que
+las entidades públicas de la región Puno emitieron en los Catálogos Electrónicos de Perú Compras entre
+enero de 2025 y septiembre de 2026, por un total de S/~85,19 millones. Con el mismo archivo de datos se
+construyó un módulo de análisis exploratorio en cada herramienta, con seis secciones equivalentes, y se
+comprobó que ambos producen exactamente las mismas cifras. Posteriormente, las herramientas se calificaron en doce
+criterios con una escala de 1 a 5 cuyos niveles están definidos de antemano, de modo que cada puntaje
+responde a algo observable durante el desarrollo. Shiny obtuvo 53 de 60 puntos y Power BI 47. La diferencia
+proviene de la analítica básica (24 frente a 18), donde R aporta histogramas, densidades y mapas con
+límites distritales; en el \emph{reporting} ambas sumaron 29 puntos, aunque por razones distintas. Power BI
+ofrece interacción sin necesidad de programar y una menor curva de aprendizaje, mientras que Shiny permite
+un diseño libre y una publicación abierta sin costo. Los resultados no señalan una herramienta superior,
+sino dos herramientas complementarias cuya elección depende del perfil de los usuarios del reporte.
+
+\medskip\noindent\textbf{Palabras clave:} inteligencia de negocios, análisis exploratorio de datos,
+tableros, Shiny, Power BI, compras públicas.
+
+
+% =============================================================================
+\section{Introducción}
+Disponer de datos no garantiza, por sí solo, mejores decisiones. Su valor depende de que se conviertan en
+información comprensible y oportuna para quien debe decidir, y esa es precisamente la tarea de la inteligencia de negocios
+\citep{watson2007,chen2012}. En la práctica, este trabajo comprende dos momentos. Primero se exploran los datos para
+entender cómo se comportan, detectar asimetrías o valores atípicos y formular buenas preguntas
+\citep{behrens1997}. Luego se comunican los resultados en reportes o tableros que otras personas consultan
+de manera autónoma \citep{yigitbasioglu2012,sarikaya2019}. La herramienta que se use en cada momento influye en
+lo que se puede analizar, en su costo y en la facilidad para mantener el trabajo.
+
+Shiny y Power BI representan dos maneras distintas de resolver ese problema. Shiny es un paquete de R con
+el que se construyen aplicaciones web interactivas escribiendo código, y se usa cada vez más para poner
+análisis estadísticos al alcance de usuarios que no programan \citep{jia2022}. Power BI es la plataforma de
+inteligencia de negocios de Microsoft, pensada para preparar datos, modelarlos y publicar reportes desde una
+interfaz visual \citep{becker2019}. Ambas permiten explorar datos y construir tableros, pero parten de
+lógicas distintas: la primera se basa en el código y la segunda en una interfaz de arrastrar y soltar.
+
+Para que la comparación tuviera validez práctica se descartó un conjunto de datos de ejemplo y se trabajó con
+información real, reciente y de la región: las compras que municipalidades, el Gobierno Regional,
+hospitales, universidades y otras entidades de Puno hicieron a través de los Catálogos Electrónicos de
+Perú Compras. Estos datos abiertos tienen valor propio, porque permiten conocer en qué se gasta el
+presupuesto público, a qué proveedores se adquiere y cómo cambió el gasto de un año a otro \citep{janssen2012}. De hecho, los registros de órdenes y
+contratos públicos ya se han usado para construir indicadores que alertan sobre riesgos en las compras del
+Estado \citep{fazekas2020}.
+Así, cada herramienta se puso a prueba con preguntas de negocio y no con ejercicios de ejemplo.
+
+El objetivo del trabajo es comparar ambas herramientas como medios de analítica básica y de
+\emph{reporting}, desarrollando en cada una un módulo de análisis exploratorio sobre los mismos datos y
+calificándolas con criterios explícitos. En las secciones siguientes se describen los datos, se presentan
+los dos módulos sección por sección, se resumen los hallazgos, se explica cómo se asignó cada puntaje y,
+al final, se discuten los resultados.
+
+% =============================================================================
+\section{Datos y preparación}
+Los datos provienen del conjunto \emph{Órdenes de compra realizadas a través de los Catálogos
+Electrónicos}, que Perú Compras publica mes a mes en la Plataforma Nacional de Datos Abiertos
+\citep{perucompras2026}. Se descargaron los 21 archivos mensuales de enero de 2025 a septiembre de 2026.
+Cada archivo trae las órdenes de todo el país con la entidad compradora, el proveedor, el rubro o acuerdo
+marco, el tipo de procedimiento, el estado de la orden y el monto.
+
+La fuente no indica la región de la entidad, así que se obtuvo del padrón reducido del RUC de la SUNAT
+\citep{sunat2026}: a cada entidad se le asignó el ubigeo de su domicilio fiscal y se conservaron solo las
+del departamento de Puno (código 21). El mismo padrón permitió saber dónde tiene su domicilio cada empresa
+proveedora y, con ello, qué parte del gasto se destina a empresas de la región. Para el mapa se usaron los
+límites distritales del INEI. Toda esta preparación se hizo una sola vez, en Python, y ambas
+herramientas partieron del mismo archivo, lo que asegura que cualquier diferencia entre ellas venga de la
+herramienta y no de los datos.
+
+El archivo final tiene 5\,929 órdenes y 25 variables. Antes de analizarlo se revisó su calidad
+(Tabla~\ref{tab:calidad}). No hubo órdenes duplicadas, valores faltantes en las variables clave ni montos
+iguales o menores a cero. Cuatro órdenes estaban resueltas o anuladas, es decir, no llegaron a
+ejecutarse, y se excluyen por defecto; por eso el análisis trabaja con 5\,925 órdenes.
+
+\begin{table}[H]\centering\small
+\caption{Revisión de la calidad de los datos}\label{tab:calidad}
+\begin{tabular}{lr}
+\toprule
+\textbf{Verificación} & \textbf{Resultado} \\ \midrule
+Órdenes en el archivo & 5\,929 \\
+Órdenes duplicadas & 0 \\
+Valores faltantes en variables clave & 0 \\
+Montos iguales o menores a cero & 0 \\
+Órdenes resueltas o anuladas (excluidas por defecto) & 4 \\
+Proveedores sin domicilio fiscal publicado en la SUNAT & 126 \\ \bottomrule
+\end{tabular}
+\end{table}
+
+% =============================================================================
+\section{Los dos módulos de reporte}
+\subsection{Módulo en Shiny}
+La aplicación está en un solo archivo, \texttt{app.R}, de unas 1\,390 líneas. Usa \texttt{bslib} para el
+diseño, \texttt{plotly} para los gráficos, \texttt{leaflet} y \texttt{sf} para el mapa
+\citep{pebesma2018} y \texttt{DT} para las tablas. A la izquierda hay un panel de filtros (periodo,
+sector, provincia, rubro y estado) y en la parte superior, seis pestañas: Resumen, Proveedores, Entidades, Mapa
+distrital, Exploración y Datos. Los filtros se aplican con un botón, para que la aplicación no recalcule
+todo cada vez que se marca una opción, y otro botón los devuelve a su estado inicial. Cada tarjeta de
+indicador muestra la variación frente a 2025 y, al pasar el cursor, explica en lenguaje sencillo qué
+significa la cifra. La aplicación está publicada en \enlace{https://mlnp.shinyapps.io/compras-puno/}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{mlnp.}\allowbreak \uline{shinyapps.}\allowbreak \uline{io/}\allowbreak \uline{compras-}\allowbreak \uline{puno/}} y su
+código en \enlace{https://github.com/mlnp-dev/compras-puno-shiny}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{github.}\allowbreak \uline{com/}\allowbreak \uline{mlnp-}\allowbreak \uline{dev/}\allowbreak \uline{compras-}\allowbreak \uline{puno-}\allowbreak \uline{shiny}}.
+
+\subsection{Módulo en Power BI}
+En Power BI se cargó el mismo archivo y se armó un modelo con dos tablas relacionadas, una de órdenes y
+otra de distritos con sus coordenadas, además de una tabla pequeña para elegir la métrica de los gráficos.
+Los cálculos están en 54 medidas DAX: indicadores, variaciones frente al año anterior, concentración,
+Pareto, estadísticos descriptivos y textos de ayuda. El reporte tiene las mismas seis secciones, con un
+menú lateral, filtros desplegables en cada página, un selector que cambia todos los gráficos entre monto,
+órdenes o empresas, una ventana emergente con la tendencia mensual y un botón para limpiar los filtros. Se
+guardó en formato de proyecto (PBIP), que conserva el modelo y las páginas como archivos de texto. Ambos
+módulos llevan arriba el mismo membrete institucional. El reporte se publicó en el servicio de Power BI
+con una cuenta institucional y la opción de publicación en la web, de modo que puede consultarse sin
+iniciar sesión en
+\enlace{https://app.powerbi.com/view?r=eyJrIjoiMmJlMGJlMjQtZmU5My00YzU3LWEwZGYtMjdlNGJiZDMzNDMwIiwidCI6ImM0YTY2YzM0LTJiYjctNDUxZi04YmUxLWIyYzI2YTQzMDE1OCIsImMiOjR9}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{app.}\allowbreak \uline{powerbi.}\allowbreak \uline{com/}\allowbreak \uline{view?r=eyJrIjoiM}\allowbreak \uline{mJlMGJlMjQtZmU5M}\allowbreak \uline{y00YzU3LWEwZGYtM}\allowbreak \uline{jdlNGJiZDMzNDMwI}\allowbreak \uline{iwidCI6ImM0YTY2Y}\allowbreak \uline{zM0LTJiYjctNDUxZ}\allowbreak \uline{i04YmUxLWIyYzI2Y}\allowbreak \uline{TQzMDE1OCIsImMiO}\allowbreak \uline{jR9}};
+el proyecto completo está en \enlace{https://github.com/mlnp-dev/compras-puno-powerbi}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{github.}\allowbreak \uline{com/}\allowbreak \uline{mlnp-}\allowbreak \uline{dev/}\allowbreak \uline{compras-}\allowbreak \uline{puno-}\allowbreak \uline{powerbi}}.
+
+% =============================================================================
+\section{Comparación sección por sección}
+Las Figuras~\ref{fig:resumen} a \ref{fig:datos} muestran, para cada sección, la pantalla de Shiny arriba y
+la de Power BI abajo, con los mismos datos y sin filtros. Verlas juntas permite notar dónde coinciden y
+dónde cada herramienta resolvió la misma pregunta de otra manera.
+
+\paragraph{Resumen.} Ambas pantallas presentan los mismos cuatro indicadores con su variación frente a
+2025 (Figura~\ref{fig:resumen}). Shiny añade una comparación acumulada de 2026 contra 2025 y anotaciones
+sobre el propio gráfico, como el pico de agosto o la caída de enero, que coincide con el inicio del año
+fiscal. Power BI resuelve lo mismo con menos elementos, pero con su selector de métrica basta un clic para
+que todas las figuras pasen de soles a número de órdenes o de empresas.
+
+\paragraph{Proveedores.} Aquí se mide qué tan concentradas están las ventas (Figura~\ref{fig:proveedores}).
+En Shiny la curva de Pareto se obtuvo ordenando y acumulando en dos líneas de R. En Power BI el mismo cálculo
+exigió una medida con una tabla virtual, aunque el resultado se lee de forma muy directa en la tarjeta
+\emph{152 de 712 empresas hacen el 80~\% del monto}.
+
+\paragraph{Entidades.} Ambas herramientas muestran quién compra y en qué sector
+(Figura~\ref{fig:entidades}). En Power BI, al hacer clic en una barra se filtra toda la página sin necesidad de
+programación; en Shiny ese comportamiento tendría que programarse.
+
+\paragraph{Mapa.} Es la sección donde más se notan las diferencias (Figura~\ref{fig:mapa}). Shiny dibuja los
+límites reales de los 109 distritos con un color según el monto y, al hacer clic en uno, muestra quién
+compra y en qué. Power BI ubica una burbuja por distrito sobre Azure Maps: la presentación es cuidada y el mapa
+base es de buena calidad, pero no muestra los límites distritales y el visual depende de que el administrador de la
+organización lo tenga habilitado. Además, el mapa de Power BI tardó varios segundos en dibujarse cada vez
+que se abría la página. La solución de Shiny es la misma que se ha usado en tableros de vigilancia de salud
+pública que combinan mapas y filtros \citep{lu2026}.
+
+\paragraph{Exploración.} Es la sección más propia del análisis exploratorio (Figura~\ref{fig:exploracion}).
+Shiny ofrece un histograma del monto en escala logarítmica, curvas de densidad por sector, un mapa de calor
+por día de la semana y la tabla de valores atípicos. Power BI no tiene histograma ni gráfico de densidad
+nativos, así que los montos se agruparon en cinco rangos y la media, la mediana, la desviación estándar, los
+cuartiles y el coeficiente de variación se calcularon con medidas DAX. El resultado es correcto y fácil de
+leer, pero obtenerlo requirió una solución alternativa.
+
+\paragraph{Datos.} Ambas herramientas permiten revisar las órdenes una por una (Figura~\ref{fig:datos}).
+Shiny trae un buscador y un botón que descarga en CSV solo lo filtrado; Power BI permite exportar desde el
+menú del propio visual.
+
+\pareja{sh_01_resumen.jpg}{pbi_01_resumen.jpg}{11.6cm}{Shiny, pestaña Resumen.}{Power BI, página Resumen.}
+{\caption{Sección Resumen: indicadores con su variación frente a 2025, evolución mensual del gasto, rubros
+y sectores.}\label{fig:resumen}}
+
+\pareja{sh_02_empresas.jpg}{pbi_02_proveedores.jpg}{11.6cm}{Shiny, pestaña Proveedores.}{Power BI, página
+Proveedores.}{\caption{Sección Proveedores: concentración de las ventas, origen de las empresas y relación
+entre número de órdenes y monto.}\label{fig:proveedores}}
+
+\pareja{sh_03_entidades.jpg}{pbi_03_entidades.jpg}{11.6cm}{Shiny, pestaña Entidades.}{Power BI, página
+Entidades.}{\caption{Sección Entidades: entidades que más compran, sectores y provincias.}\label{fig:entidades}}
+
+\pareja{sh_04_mapa.jpg}{pbi_04_mapa.jpg}{11.6cm}{Shiny, mapa con los límites de los distritos
+(\texttt{leaflet} y \texttt{sf}).}{Power BI, burbujas por distrito sobre Azure Maps.}{\caption{Sección
+Mapa: en ambas herramientas el distrito de Puno concentra el 71~\% del monto.}\label{fig:mapa}}
+
+\pareja{sh_05_exploracion.jpg}{pbi_05_exploracion.jpg}{11.6cm}{Shiny, pestaña Exploración.}{Power BI,
+página Exploración.}{\caption{Sección Exploración: estadísticos descriptivos, distribución de los montos,
+días de emisión y órdenes atípicas.}\label{fig:exploracion}}
+
+\pareja{sh_06_datos.jpg}{pbi_06_datos.jpg}{9cm}{Shiny, pestaña Datos.}{Power BI, página Datos.}
+{\caption{Sección Datos: detalle de las órdenes con filtros y exportación.}\label{fig:datos}}
+
+% =============================================================================
+\section{Lo que muestran los datos}
+Antes de comparar las herramientas es necesario verificar que ambas produzcan los mismos resultados. Las medidas de Power BI se
+consultaron directamente en su motor de cálculo y se cotejaron con los valores de la aplicación Shiny.
+Coincidieron en todos los indicadores (Tabla~\ref{tab:cifras}), de modo que las diferencias que se
+discuten después son de forma y de proceso, no de resultado.
+
+\begin{table}[H]\centering\small
+\caption{Indicadores calculados en ambas herramientas}\label{tab:cifras}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Indicador} & \textbf{Shiny} & \textbf{Power BI} \\ \midrule
+Monto total & S/ 85,19 millones & S/ 85,19 millones \\
+Órdenes & 5\,925 & 5\,925 \\
+Ticket promedio & S/ 14\,377 & S/ 14\,377 \\
+Mediana del monto por orden & S/ 3\,370 & S/ 3\,370 \\
+Empresas proveedoras & 712 & 712 \\
+Variación del monto, enero a septiembre de 2026 frente a 2025 & $-$22,1~\% & $-$22,1~\% \\
+Variación del número de órdenes en el mismo periodo & $-$11,8~\% & $-$11,8~\% \\
+Monto que va a empresas de Puno & 12,5~\% & 12,5~\% \\
+Empresas que concentran el 80~\% del monto & 152 & 152 \\ \bottomrule
+\end{tabular}
+\end{table}
+
+El primer resultado relevante es la reducción de las compras en 2026. Entre enero y septiembre el monto fue
+22,1~\% menor que en los mismos meses de 2025 (S/~29,60 millones frente a S/~38,02 millones), con 11,8~\%
+menos órdenes y 21,2~\% menos empresas proveedoras. Además, el gasto se concentra en pocas entidades: el
+Gobierno Regional es el sector que más compra (S/~33,4 millones, 39~\% del total) y una sola entidad, el
+Gobierno Regional Puno, explica el 36,1~\% del monto. Por rubros dominan las computadoras de escritorio y
+portátiles, con S/~21,1 millones (24,8~\%), seguidas de los útiles de escritorio, los accesorios domésticos
+y las tuberías y pinturas.
+
+En cuanto a los proveedores, las empresas con domicilio en Puno reciben solo el 12,5~\% del monto,
+mientras que las de Lima y Callao concentran el 42~\%. Asimismo, 152 de las 712 empresas, el 21,3~\%, acumulan el
+80~\% del monto, un reparto muy cercano a la regla de Pareto. En el territorio ocurre algo parecido: el
+distrito de Puno concentra el 71~\% del gasto (S/~60,6 millones), 6,6 veces el monto de Juliaca, que ocupa el
+segundo lugar.
+
+Los montos son muy asimétricos. La media (S/~14\,377) es 4,3 veces la mediana (S/~3\,370) y el coeficiente
+de variación llega a 502~\%. Casi la mitad de las órdenes (46~\%) está entre S/~1~mil y S/~5~mil, pero el
+2~\% que supera los S/~100~mil concentra el 39~\% del dinero; la orden más grande, de S/~4,13 millones, fue
+una compra de computadoras de la Universidad Nacional del Altiplano. Por último, casi la totalidad de las órdenes
+se emite en días hábiles: entre 1\,105 y 1\,262 por cada día de lunes a viernes, frente a 69 los sábados y
+12 los domingos.
+
+% =============================================================================
+\section{Cómo se asignaron los puntajes}
+\subsection{Criterios y escala}
+La comparación usa doce criterios. Cinco miden la \textbf{analítica básica}, es decir, qué tan bien
+permite cada herramienta preparar, calcular, describir y representar los datos. Los otros siete miden el
+\textbf{\emph{reporting}}: cómo se usa, se ve, se publica y se mantiene el reporte. Se eligieron a partir
+de lo que la literatura señala como esencial en un tablero, que es mostrar lo importante de un vistazo,
+permitir filtrar y profundizar, y llegar a quien lo necesita \citep{yigitbasioglu2012,sarikaya2019,bach2023},
+y de la manera en que el análisis visual interactivo apoya la exploración \citep{heer2012}. También se
+incluyó la reproducibilidad, porque un análisis que no puede repetirse pierde valor como evidencia
+\citep{peng2011,sandve2013}.
+
+Para que el puntaje no dependiera de una apreciación general, antes de calificar se fijó qué significa cada
+nivel de la escala (Tabla~\ref{tab:escala}). Cada criterio se calificó preguntando cómo resolvió la
+herramienta esa tarea concreta en este proyecto, y el puntaje es el nivel cuya descripción encaja con lo
+que ocurrió. Todos los criterios pesan lo mismo, así que el subtotal de cada dimensión es la suma de sus
+puntajes.
+
+\begin{table}[H]\centering\small
+\caption{Escala usada para calificar cada criterio}\label{tab:escala}
+\begin{tabularx}{\textwidth}{c l X}
+\toprule
+\textbf{Puntaje} & \textbf{Nivel} & \textbf{Qué tuvo que ocurrir en el proyecto} \\ \midrule
+5 & Muy sólido & La herramienta resolvió la tarea de forma nativa o con poco esfuerzo, sin
+restricciones. \\
+4 & Sólido & La resolvió por completo, pero con un esfuerzo adicional moderado (configurar, aprender un
+concepto nuevo, escribir algo de código). \\
+3 & Aceptable & La resolvió solo en parte, mediante un rodeo, o dependiendo de una condición externa como
+una licencia de pago o el permiso de un administrador. \\
+2 & Débil & Solo fue posible con mucho trabajo o con conocimientos especializados previos. \\
+1 & Insuficiente & No se pudo resolver en este proyecto. \\ \bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Puntajes y evidencia}
+La Tabla~\ref{tab:comparacion} recoge cada puntaje junto con lo que se observó y la figura donde puede
+verse. A continuación se comentan los criterios con mayor diferencia.
+
+En \emph{estadística descriptiva} Shiny recibe 5 y Power BI 3 porque R entregó el histograma en escala
+logarítmica, las densidades por sector y los percentiles sin salir de la aplicación, mientras que en Power
+BI hubo que sustituir el histograma por rangos de monto y calcular cada estadístico con DAX, lo que
+corresponde al nivel 3 de la escala (Figura~\ref{fig:exploracion}). En \emph{cartografía} ocurre lo
+mismo: Shiny dibujó los 109 distritos con sus límites oficiales, y Power BI solo pudo representar burbujas,
+además de depender de que Azure Maps esté permitido en la cuenta (Figura~\ref{fig:mapa}).
+
+En sentido contrario, Power BI recibe 5 en \emph{interactividad} porque el filtrado cruzado, las ventanas
+emergentes y el selector de métrica funcionan sin programar. Shiny recibe 4 porque todo eso es posible,
+pero cada interacción, como el botón de aplicar filtros o el clic sobre el mapa, tuvo que escribirse y
+probarse. La mayor brecha está en la \emph{curva de aprendizaje}: para una persona que no programa, Power BI
+produce resultados desde las primeras horas de uso (5), mientras que Shiny exige saber R y entender la programación
+reactiva (2). Esto coincide con la idea de la inteligencia de negocios de autoservicio, en la que el
+propio usuario arma sus reportes sin depender de un programador \citep{alpar2016}, aunque incluso en ese
+modelo los usuarios enfrentan vacíos de conocimiento cuando el análisis se vuelve más complejo
+\citep{lennerholt2021}. En \emph{publicación} y \emph{costo} la situación se invierte. La aplicación Shiny quedó en
+línea con una cuenta gratuita y un enlace abierto, mientras que compartir un reporte de Power BI con otras
+personas requiere una cuenta institucional y licencias de pago, por lo que recibe 3 en ambos criterios. En
+\emph{escalabilidad} Power BI obtiene 5 gracias a su motor en memoria pensado para muchos usuarios, frente a
+un 3 de Shiny, cuyo plan gratuito suspende la aplicación tras un periodo de inactividad y que, con muchos usuarios a
+la vez, necesitaría más servidores.
+
+\begin{table}[p]\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.25}
+\caption{Puntajes por criterio y evidencia que los respalda (escala de la Tabla~\ref{tab:escala})}\label{tab:comparacion}
+\rowcolors{3}{black!4}{white}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}X c >{\raggedright\arraybackslash}X c}
+\toprule
+\textbf{Criterio} & \textbf{Shiny: lo que se observó} & \textbf{Pts.} & \textbf{Power BI: lo que se observó} & \textbf{Pts.} \\ \midrule
+\multicolumn{5}{l}{\cellcolor{white}\textit{Analítica básica}} \\
+Preparación de datos & Transformaciones en código \texttt{dplyr}, documentadas y repetibles. & 5 &
+Power Query cubre los pasos simples; la lógica queda repartida en pasos de la interfaz, más difíciles de
+revisar. & 4 \\
+Cálculo de indicadores & Cada indicador es una línea de R, pero hay que escribirla para cada salida. & 4 &
+Medidas DAX reutilizables en todo el reporte; exigen entender el contexto de filtro. & 4 \\
+Estadística descriptiva & Histograma logarítmico, densidades, percentiles y asimetría nativos
+(Fig.~\ref{fig:exploracion}). & 5 & Sin histograma ni densidad; se usaron rangos de monto y estadísticos
+en DAX. & 3 \\
+Gráficos & \texttt{plotly} con anotaciones y control total de cada detalle. & 5 & Catálogo amplio y
+pulido, con opciones limitadas por visual. & 4 \\
+Cartografía & Límites oficiales de 109 distritos y detalle al hacer clic (Fig.~\ref{fig:mapa}). & 5 &
+Solo burbujas por coordenadas; Azure Maps depende del administrador. & 3 \\ \midrule
+\multicolumn{5}{l}{\cellcolor{white}\textit{Reporting}} \\
+Interactividad & Posible, pero cada interacción se programó y probó. & 4 & Filtrado cruzado, ventana
+emergente y selector de métrica sin programar. & 5 \\
+Diseño & Página web con CSS libre: membrete, fondo y tarjetas propias. & 5 & Lienzo fijo y temas; buen
+acabado dentro de lo que permite cada visual. & 4 \\
+Curva de aprendizaje & Requiere R y programación reactiva. & 2 & Arrastrar y soltar; resultados
+inmediatos. & 5 \\
+Publicación & shinyapps.io gratuito y enlace público en minutos. & 5 & Compartir exige cuenta
+institucional y licencia de pago. & 3 \\
+Reproducibilidad & Un archivo de código versionado en GitHub. & 5 & El formato PBIP permite versionar,
+aunque es menos legible que un script. & 4 \\
+Costo & Software libre y plan de publicación gratuito. & 5 & Desktop gratuito; distribuir el reporte
+tiene costo por usuario. & 3 \\
+Escalabilidad & Con muchos usuarios se necesitan más instancias; el plan gratuito se suspende sin uso. &
+3 & Motor columnar en memoria, diseñado para muchos usuarios y registros. & 5 \\ \midrule
+\multicolumn{2}{l}{\cellcolor{white}\textbf{Subtotal analítica básica} (máximo 25)} & \textbf{24} & & \textbf{18} \\
+\multicolumn{2}{l}{\cellcolor{white}\textbf{Subtotal \emph{reporting}} (máximo 35)} & \textbf{29} & & \textbf{29} \\
+\multicolumn{2}{l}{\cellcolor{white}\textbf{Total} (máximo 60)} & \textbf{53} & & \textbf{47} \\ \bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Cómo leer el resultado}
+Sumados, Shiny obtiene 53 puntos y Power BI 47, pero esa diferencia proviene íntegramente de la analítica básica. En
+el \emph{reporting} empatan con 29 puntos, aunque cada una sobresale en criterios distintos: Power BI en
+interactividad, facilidad de aprendizaje y escalabilidad; Shiny en diseño, publicación, reproducibilidad y
+costo. Por eso el total no debe leerse como un veredicto general. Si quien mantendrá el reporte no tiene
+formación en programación, el criterio de curva de aprendizaje adquiere mayor peso y la evaluación se
+inclina hacia Power BI. Si lo que importa es el análisis estadístico o publicar abiertamente sin costo, favorece a
+Shiny.
+
+% =============================================================================
+\section{Discusión}
+Los resultados indican que ambas herramientas no compiten en el mismo ámbito. Shiny rinde mejor cuando el
+análisis es el centro del trabajo: ensayar transformaciones, examinar distribuciones con escalas logarítmicas o
+marcar los valores atípicos sobre el gráfico. Al ser una interfaz web sobre R, hereda todo lo que el
+lenguaje ofrece, que es la razón por la que se ha vuelto común para llevar análisis especializados a
+usuarios sin formación en programación \citep{jia2022}. Power BI, en cambio, está pensado para la persona
+que consulta el reporte y necesita filtrar, comparar y obtener una respuesta sin tocar los cálculos, lo
+que explica que se haya adoptado incluso fuera del ámbito empresarial para analizar y visualizar datos
+diversos \citep{becker2019}. Las comparaciones de Power BI con otras herramientas de visualización también
+suelen centrarse en la usabilidad y en las funciones de visualización para usuarios de negocio
+\citep{sahaya2024}.
+
+Esta diferencia encaja con la distinción entre explorar y comunicar. La exploración requiere libertad para
+examinar los datos desde varios ángulos \citep{behrens1997}, mientras que un buen tablero debe mostrar lo
+esencial de inmediato y dejar que el usuario profundice cuando lo necesite
+\citep{shneiderman1996,yigitbasioglu2012}. En este proyecto el análisis exploratorio resultó más natural en
+Shiny y el tablero navegable, con filtrado cruzado y ventana emergente, fue más rápido de lograr en Power
+BI. La interacción, que la literatura considera central en el análisis visual \citep{heer2012}, es
+justamente lo que Power BI entrega sin costo de desarrollo, mientras que en Shiny hay que construirla.
+
+El acceso es otro factor relevante. Shiny permitió publicar el reporte de forma gratuita y abierta en poco tiempo, algo
+valioso cuando el propósito es la transparencia y los datos ya son públicos \citep{janssen2012}. Power BI
+está concebido para organizaciones con licencias y administradores, y publicar un reporte abiertamente
+requiere habilitar opciones que muchas instituciones mantienen deshabilitadas. No es un defecto técnico, sino una
+decisión de diseño orientada a controlar quién ve la información. Por eso, para una oficina de
+abastecimiento cuyos usuarios necesitan consultas rápidas dentro de la entidad, Power BI sería la opción más
+práctica, y para un estudio del gasto público que requiera métodos estadísticos más exigentes, Shiny ofrece
+mayores ventajas.
+
+El estudio presenta algunas limitaciones. Los puntajes reflejan la experiencia de una sola
+persona con un conjunto de datos de tamaño moderado; aunque la escala se definió de antemano, sigue siendo
+una valoración y no una medición con usuarios. Tampoco se probaron la actualización automática de datos, la
+seguridad por filas ni un número elevado de usuarios concurrentes, escenarios en los que Power BI probablemente sumaría
+ventajas. Finalmente, la región se asignó por el domicilio fiscal de cada entidad, que no siempre coincide
+con el lugar donde se usa lo comprado.
+
+% =============================================================================
+\section{Conclusiones}
+\begin{enumerate}
+\item Con los mismos datos se construyeron dos módulos de análisis exploratorio de seis secciones cada uno,
+una aplicación en Shiny y un reporte en Power BI, y ambos producen exactamente las mismas cifras, lo que
+hace válida la comparación.
+\item En analítica básica Shiny obtuvo más puntos (24 frente a 18), sobre todo en estadística descriptiva,
+gráficos y cartografía, porque trabaja directamente sobre R.
+\item En \emph{reporting} ambas herramientas obtuvieron 29 puntos. Power BI destaca por su interacción sin necesidad de programar, por
+su facilidad de aprendizaje y por su escalabilidad; Shiny, por su libertad de diseño, su costo nulo y
+la posibilidad de publicar abiertamente.
+\item Las herramientas se complementan. Un flujo de trabajo recomendable consiste en explorar y validar en R o Shiny y trasladar
+después los indicadores consolidados a Power BI cuando el reporte deba distribuirse dentro de una
+organización.
+\item Más allá de la comparación, el análisis aporta información relevante para la gestión regional: en 2026 el
+gasto cayó 22,1~\%, se concentra en el distrito de Puno y en el Gobierno Regional, y solo el 12,5~\% del
+monto se adjudica a empresas de la región.
+\end{enumerate}
+
+% =============================================================================
+\newpage
+\section*{Referencias}
+% APA 7. Artículos de revistas indexadas en Scopus o publicaciones de IEEE, verificados en Crossref el
+% 24/10/2026. Los conjuntos de datos van aparte, en Fuentes de datos.
+\renewcommand{\refname}{}
+\setlength{\bibsep}{6pt}
+\setlength{\bibhang}{1.27cm}
+\vspace{-1.2cm}
+\begin{thebibliography}{99}\small
+\bibitem[Alpar y Schulz(2016)]{alpar2016}
+Alpar, P. y Schulz, M. (2016). Self-service business intelligence. \emph{Business \& Information Systems
+Engineering, 58}(2), 151--155. \enlace{https://doi.org/10.1007/s12599-016-0424-6}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1007/}\allowbreak \uline{s12599-}\allowbreak \uline{016-}\allowbreak \uline{0424-}\allowbreak \uline{6}}
+
+\bibitem[Bach et~al.(2023)]{bach2023}
+Bach, B., Freeman, E., Abdul-Rahman, A., Turkay, C., Khan, S., Fan, Y. y Chen, M. (2023). Dashboard design
+patterns. \emph{IEEE Transactions on Visualization and Computer Graphics, 29}(1), 342--352.
+\enlace{https://doi.org/10.1109/TVCG.2022.3209448}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1109/}\allowbreak \uline{TVCG.}\allowbreak \uline{2022.}\allowbreak \uline{3209448}}
+
+\bibitem[Becker y Gould(2019)]{becker2019}
+Becker, L. T. y Gould, E. M. (2019). Microsoft Power BI: Extending Excel to manipulate, analyze, and
+visualize diverse data. \emph{Serials Review, 45}(3), 184--188.
+\enlace{https://doi.org/10.1080/00987913.2019.1644891}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1080/}\allowbreak \uline{00987913.}\allowbreak \uline{2019.}\allowbreak \uline{1644891}}
+
+\bibitem[Behrens(1997)]{behrens1997}
+Behrens, J. T. (1997). Principles and procedures of exploratory data analysis. \emph{Psychological
+Methods, 2}(2), 131--160. \enlace{https://doi.org/10.1037/1082-989X.2.2.131}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1037/}\allowbreak \uline{1082-}\allowbreak \uline{989X.}\allowbreak \uline{2.}\allowbreak \uline{2.}\allowbreak \uline{131}}
+
+\bibitem[Chen et~al.(2012)]{chen2012}
+Chen, H., Chiang, R. H. L. y Storey, V. C. (2012). Business intelligence and analytics: From big data to
+big impact. \emph{MIS Quarterly, 36}(4), 1165--1188. \enlace{https://doi.org/10.2307/41703503}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{2307/}\allowbreak \uline{41703503}}
+
+\bibitem[Fazekas y Kocsis(2020)]{fazekas2020}
+Fazekas, M. y Kocsis, G. (2020). Uncovering high-level corruption: Cross-national objective corruption risk
+indicators using public procurement data. \emph{British Journal of Political Science, 50}(1), 155--164.
+\enlace{https://doi.org/10.1017/S0007123417000461}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1017/}\allowbreak \uline{S0007123417000461}}
+
+\bibitem[Heer y Shneiderman(2012)]{heer2012}
+Heer, J. y Shneiderman, B. (2012). Interactive dynamics for visual analysis. \emph{Communications of the
+ACM, 55}(4), 45--54. \enlace{https://doi.org/10.1145/2133806.2133821}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1145/}\allowbreak \uline{2133806.}\allowbreak \uline{2133821}}
+
+\bibitem[Janssen et~al.(2012)]{janssen2012}
+Janssen, M., Charalabidis, Y. y Zuiderwijk, A. (2012). Benefits, adoption barriers and myths of open data
+and open government. \emph{Information Systems Management, 29}(4), 258--268.
+\enlace{https://doi.org/10.1080/10580530.2012.716740}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1080/}\allowbreak \uline{10580530.}\allowbreak \uline{2012.}\allowbreak \uline{716740}}
+
+\bibitem[Jia et~al.(2022)]{jia2022}
+Jia, L., Yao, W., Jiang, Y., Li, Y., Wang, Z., Li, H., Huang, F., Li, J., Chen, T. y Zhang, H. (2022).
+Development of interactive biological web applications with R/Shiny. \emph{Briefings in Bioinformatics,
+23}(1), Artículo bbab415. \enlace{https://doi.org/10.1093/bib/bbab415}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1093/}\allowbreak \uline{bib/}\allowbreak \uline{bbab415}}
+
+\bibitem[Lennerholt et~al.(2021)]{lennerholt2021}
+Lennerholt, C., van Laere, J. y Söderström, E. (2021). User-related challenges of self-service business
+intelligence. \emph{Information Systems Management, 38}(4), 309--323.
+\enlace{https://doi.org/10.1080/10580530.2020.1814458}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1080/}\allowbreak \uline{10580530.}\allowbreak \uline{2020.}\allowbreak \uline{1814458}}
+
+\bibitem[Lu et~al.(2026)]{lu2026}
+Lu, P., Jain, S., León, T. M. y White, L. A. (2026). CalCORVID: A dynamic RShiny dashboard approach to
+visualize spatiotemporal clusters for public health surveillance. \emph{BMC Public Health, 26}(1),
+Artículo 925. \enlace{https://doi.org/10.1186/s12889-026-26201-1}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1186/}\allowbreak \uline{s12889-}\allowbreak \uline{026-}\allowbreak \uline{26201-}\allowbreak \uline{1}}
+
+\bibitem[Pebesma(2018)]{pebesma2018}
+Pebesma, E. (2018). Simple features for R: Standardized support for spatial vector data. \emph{The R
+Journal, 10}(1), 439--446. \enlace{https://doi.org/10.32614/RJ-2018-009}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{32614/}\allowbreak \uline{RJ-}\allowbreak \uline{2018-}\allowbreak \uline{009}}
+
+\bibitem[Peng(2011)]{peng2011}
+Peng, R. D. (2011). Reproducible research in computational science. \emph{Science, 334}(6060),
+1226--1227. \enlace{https://doi.org/10.1126/science.1213847}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1126/}\allowbreak \uline{science.}\allowbreak \uline{1213847}}
+
+\bibitem[Sahaya et~al.(2024)]{sahaya2024}
+Sahaya, A. P. N., Purnawarman, D., Rasyidah, F. S., Prabowo, Y. D., Sarwo y Gatc, J. (2024). Powering
+sales insights: A comparative analysis of data visualization tools, Microsoft Power BI vs Tableau. En
+\emph{2024 9th International Conference on Business and Industrial Research (ICBIR)} (pp. 1042--1047).
+IEEE. \enlace{https://doi.org/10.1109/ICBIR61386.2024.10875740}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1109/}\allowbreak \uline{ICBIR61386.}\allowbreak \uline{2024.}\allowbreak \uline{10875740}}
+
+\bibitem[Sandve et~al.(2013)]{sandve2013}
+Sandve, G. K., Nekrutenko, A., Taylor, J. y Hovig, E. (2013). Ten simple rules for reproducible
+computational research. \emph{PLoS Computational Biology, 9}(10), Artículo e1003285.
+\enlace{https://doi.org/10.1371/journal.pcbi.1003285}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1371/}\allowbreak \uline{journal.}\allowbreak \uline{pcbi.}\allowbreak \uline{1003285}}
+
+\bibitem[Sarikaya et~al.(2019)]{sarikaya2019}
+Sarikaya, A., Correll, M., Bartram, L., Tory, M. y Fisher, D. (2019). What do we talk about when we talk
+about dashboards? \emph{IEEE Transactions on Visualization and Computer Graphics, 25}(1), 682--692.
+\enlace{https://doi.org/10.1109/TVCG.2018.2864903}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1109/}\allowbreak \uline{TVCG.}\allowbreak \uline{2018.}\allowbreak \uline{2864903}}
+
+\bibitem[Shneiderman(1996)]{shneiderman1996}
+Shneiderman, B. (1996). The eyes have it: A task by data type taxonomy for information visualizations. En
+\emph{Proceedings 1996 IEEE Symposium on Visual Languages} (pp. 336--343). IEEE.
+\enlace{https://doi.org/10.1109/VL.1996.545307}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1109/}\allowbreak \uline{VL.}\allowbreak \uline{1996.}\allowbreak \uline{545307}}
+
+\bibitem[Watson y Wixom(2007)]{watson2007}
+Watson, H. J. y Wixom, B. H. (2007). The current state of business intelligence. \emph{Computer, 40}(9),
+96--99. \enlace{https://doi.org/10.1109/MC.2007.331}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1109/}\allowbreak \uline{MC.}\allowbreak \uline{2007.}\allowbreak \uline{331}}
+
+\bibitem[Yigitbasioglu y Velcu(2012)]{yigitbasioglu2012}
+Yigitbasioglu, O. M. y Velcu, O. (2012). A review of dashboards in performance management: Implications
+for design and research. \emph{International Journal of Accounting Information Systems, 13}(1), 41--59.
+\enlace{https://doi.org/10.1016/j.accinf.2011.08.002}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{doi.}\allowbreak \uline{org/}\allowbreak \uline{10.}\allowbreak \uline{1016/}\allowbreak \uline{j.}\allowbreak \uline{accinf.}\allowbreak \uline{2011.}\allowbreak \uline{08.}\allowbreak \uline{002}}
+
+\end{thebibliography}
+
+\section*{Fuentes de datos}
+\vspace{-1.2cm}
+\begin{thebibliography}{99}\small
+\bibitem[Central de Compras Públicas Perú Compras(2026)]{perucompras2026}
+Central de Compras Públicas Perú Compras. (2026). \emph{Órdenes de compra realizadas a través de los
+Catálogos Electrónicos} [Conjunto de datos]. Plataforma Nacional de Datos Abiertos.
+\enlace{https://www.datosabiertos.gob.pe/dataset/órdenes-de-compra-realizadas-través-de-los-catálogos-electrónicos-central-de-compras-públicas-perú-compras}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{www.}\allowbreak \uline{datosabiertos.}\allowbreak \uline{gob.}\allowbreak \uline{pe/}\allowbreak \uline{dataset/}\allowbreak \uline{órdenes-}\allowbreak \uline{de-}\allowbreak \uline{compra-}\allowbreak \uline{realizadas-}\allowbreak \uline{través-}\allowbreak \uline{de-}\allowbreak \uline{los-}\allowbreak \uline{catálogos-}\allowbreak \uline{electrónicos-}\allowbreak \uline{central-}\allowbreak \uline{de-}\allowbreak \uline{compras-}\allowbreak \uline{públicas-}\allowbreak \uline{perú-}\allowbreak \uline{compras}}
+
+\bibitem[Superintendencia Nacional de Aduanas y de Administración Tributaria(2026)]{sunat2026}
+Superintendencia Nacional de Aduanas y de Administración Tributaria. (2026). \emph{Padrón reducido del
+RUC} [Conjunto de datos]. \enlace{https://www.sunat.gob.pe/descargaPRR/mrc137_padron_reducido.html}{\uline{https:/}\allowbreak \uline{/}\allowbreak \uline{www.}\allowbreak \uline{sunat.}\allowbreak \uline{gob.}\allowbreak \uline{pe/}\allowbreak \uline{descargaPRR/}\allowbreak \uline{mrc137\_}\allowbreak \uline{padron\_}\allowbreak \uline{reducido.}\allowbreak \uline{html}}
+\end{thebibliography}
+
+\end{document}
