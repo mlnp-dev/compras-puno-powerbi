@@ -1,0 +1,4 @@
+relationship 'Compras a Distritos'
+	fromColumn: Compras.ubigeo
+	toColumn: Distritos.ubigeo
+

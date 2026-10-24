@@ -1,0 +1,4 @@
+/// Carpeta con compras.csv y distritos.csv (sale de scripts/03_preparar_powerbi.R)
+expression CarpetaDatos = "C:\Users\Usuario\Desktop\MAESTRIA 2026\CURSO DE BUSINESS INTELIGENCE\ACTIVIDAD SEMANA 2\data\powerbi\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 1bba2018-eecf-4b60-a898-1272031e9b92
+

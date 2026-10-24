@@ -1,0 +1,61 @@
+table Distritos
+	lineageTag: f678d774-6cdd-4354-b56a-bc67274e93c1
+
+	column ubigeo
+		dataType: string
+		lineageTag: 0e3f659c-5635-4aed-b888-9826281e079a
+		summarizeBy: none
+		sourceColumn: ubigeo
+
+	column distrito
+		dataType: string
+		lineageTag: e98fa612-ae1e-42a1-81aa-a1842419f99b
+		dataCategory: City
+		summarizeBy: none
+		sourceColumn: distrito
+
+	column provincia
+		dataType: string
+		lineageTag: e811e571-b5a7-44e3-961e-7b31c42b5bc0
+		summarizeBy: none
+		sourceColumn: provincia
+
+	column latitud
+		dataType: double
+		formatString: 0.00000
+		lineageTag: fbe94980-5691-4712-ad5e-1b47391a74e7
+		dataCategory: Latitude
+		summarizeBy: none
+		sourceColumn: latitud
+
+	column longitud
+		dataType: double
+		formatString: 0.00000
+		lineageTag: 386a9d9e-f476-4626-9c32-e13ac5fa2881
+		dataCategory: Longitude
+		summarizeBy: none
+		sourceColumn: longitud
+
+	column zona
+		dataType: string
+		lineageTag: c3dc0ab0-8fd8-4cb7-944a-c0b71020a341
+		summarizeBy: none
+		sourceColumn: zona
+
+	column lugar
+		dataType: string
+		lineageTag: 49ff4a72-31db-49f0-8854-08b766380d49
+		dataCategory: Place
+		summarizeBy: none
+		sourceColumn: lugar
+
+	partition Distritos = m
+		mode: import
+		source =
+				let
+					Origen = Csv.Document(File.Contents(CarpetaDatos & "distritos.csv"), [Delimiter = ",", Columns = 7, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+					Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+					Tipos = Table.TransformColumnTypes(Encabezados, {{"ubigeo", type text}, {"distrito", type text}, {"provincia", type text}, {"latitud", type number}, {"longitud", type number}, {"zona", type text}, {"lugar", type text}}, "en-US")
+				in
+					Tipos
+

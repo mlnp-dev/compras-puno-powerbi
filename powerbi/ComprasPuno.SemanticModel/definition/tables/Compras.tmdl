@@ -1,0 +1,598 @@
+table Compras
+	lineageTag: a2f8854d-ba9d-443b-bf86-46d27f0ba4b4
+
+	/// Monto total de las órdenes, con IGV
+	measure Monto = SUM ( Compras[total] )
+		formatString: \S\/ #,0
+		displayFolder: Básicas
+		lineageTag: f30925fa-0c1e-4056-be41-b4e99f842def
+
+	/// Número de órdenes de compra
+	measure Órdenes = COUNTROWS ( Compras )
+		formatString: #,0
+		displayFolder: Básicas
+		lineageTag: 64a35761-44c4-42e2-bdfe-a3a16867b4d8
+
+	/// Monto promedio por orden
+	measure 'Ticket promedio' = DIVIDE ( [Monto], [Órdenes] )
+		formatString: \S\/ #,0
+		displayFolder: Básicas
+		lineageTag: c302bd59-8221-45dd-bfff-62b3efd0ef62
+
+	/// Empresas distintas que recibieron al menos una orden
+	measure Proveedores = DISTINCTCOUNT ( Compras[ruc_proveedor] )
+		formatString: #,0
+		displayFolder: Básicas
+		lineageTag: 612eb29b-9941-4c17-9242-b925394ecac3
+
+	/// Entidades públicas distintas que compraron
+	measure Entidades = DISTINCTCOUNT ( Compras[ruc_entidad] )
+		formatString: #,0
+		displayFolder: Básicas
+		lineageTag: 0a8c5434-8841-4d6e-a6a5-6b5dd34490b4
+
+	/// Meses con al menos una orden
+	measure 'Meses con compras' = DISTINCTCOUNT ( Compras[periodo] )
+		formatString: #,0
+		displayFolder: Básicas
+		lineageTag: cb0bdc7c-470b-4b21-9dab-f29e2ddbb10e
+
+	/// Promedio mensual del monto
+	measure 'Monto por mes' = DIVIDE ( [Monto], [Meses con compras] )
+		formatString: \S\/ #,0
+		displayFolder: Básicas
+		lineageTag: dab55eed-63d0-40f9-8fc2-4b716958e3ff
+
+	/// Mediana del monto por orden
+	measure 'Orden típica' = MEDIAN ( Compras[total] )
+		formatString: \S\/ #,0
+		displayFolder: Básicas
+		lineageTag: 3c6aa67a-d33e-450e-9013-d164dba083e6
+
+	/// Monto desde enero hasta el mes en curso, dentro de cada año
+	measure 'Monto acumulado' =
+			VAR m = MAX ( Compras[mes] )
+			RETURN
+				CALCULATE ( [Monto], Compras[mes] <= m, REMOVEFILTERS ( Compras[mes_nombre] ) )
+		formatString: \S\/ #,0
+		displayFolder: Comparación anual
+		lineageTag: 0837c679-7211-4ec3-ba37-6e6d6a8a1308
+
+	/// Cambio de monto del último año frente a los mismos meses del año anterior
+	measure 'Var % Monto' =
+			VAR ult = MAX ( Compras[anio] )
+			VAR mesmax = CALCULATE ( MAX ( Compras[mes] ), Compras[anio] = ult )
+			VAR act = CALCULATE ( [Monto], Compras[anio] = ult )
+			VAR ant = CALCULATE ( [Monto], Compras[anio] = ult - 1, Compras[mes] <= mesmax )
+			RETURN
+				IF ( NOT ISBLANK ( act ) && NOT ISBLANK ( ant ), DIVIDE ( act - ant, ant ) )
+		formatString: 0.0%
+		displayFolder: Comparación anual
+		lineageTag: da8c0836-92cf-4dc8-b068-1c4c35fa4494
+
+	/// Texto con la variación de monto
+	measure 'Etiqueta var Monto' =
+			VAR v = [Var % Monto]
+			VAR ult = MAX ( Compras[anio] )
+			RETURN
+				IF (
+					ISBLANK ( v ),
+					"Sin año anterior para comparar",
+					IF ( v < 0, "▼ ", "▲ " ) & FORMAT ( ABS ( v ), "0.0%" ) & " vs " & ( ult - 1 )
+				)
+		displayFolder: Comparación anual
+		lineageTag: 6f62d3a8-980f-468e-b09c-ed196ac1dc38
+
+	/// Cambio de órdenes del último año frente a los mismos meses del año anterior
+	measure 'Var % Órdenes' =
+			VAR ult = MAX ( Compras[anio] )
+			VAR mesmax = CALCULATE ( MAX ( Compras[mes] ), Compras[anio] = ult )
+			VAR act = CALCULATE ( [Órdenes], Compras[anio] = ult )
+			VAR ant = CALCULATE ( [Órdenes], Compras[anio] = ult - 1, Compras[mes] <= mesmax )
+			RETURN
+				IF ( NOT ISBLANK ( act ) && NOT ISBLANK ( ant ), DIVIDE ( act - ant, ant ) )
+		formatString: 0.0%
+		displayFolder: Comparación anual
+		lineageTag: e0b7f76e-fdfe-4207-9b8f-56315bc8fe0e
+
+	/// Texto con la variación de órdenes
+	measure 'Etiqueta var Órdenes' =
+			VAR v = [Var % Órdenes]
+			VAR ult = MAX ( Compras[anio] )
+			RETURN
+				IF (
+					ISBLANK ( v ),
+					"Sin año anterior para comparar",
+					IF ( v < 0, "▼ ", "▲ " ) & FORMAT ( ABS ( v ), "0.0%" ) & " vs " & ( ult - 1 )
+				)
+		displayFolder: Comparación anual
+		lineageTag: b80ea2e7-dfbc-471b-ae8b-c6ad8f96a088
+
+	/// Cambio de ticket del último año frente a los mismos meses del año anterior
+	measure 'Var % Ticket' =
+			VAR ult = MAX ( Compras[anio] )
+			VAR mesmax = CALCULATE ( MAX ( Compras[mes] ), Compras[anio] = ult )
+			VAR act = CALCULATE ( [Ticket promedio], Compras[anio] = ult )
+			VAR ant = CALCULATE ( [Ticket promedio], Compras[anio] = ult - 1, Compras[mes] <= mesmax )
+			RETURN
+				IF ( NOT ISBLANK ( act ) && NOT ISBLANK ( ant ), DIVIDE ( act - ant, ant ) )
+		formatString: 0.0%
+		displayFolder: Comparación anual
+		lineageTag: 0a8593fa-d3d6-4e22-bebc-bc31e356e348
+
+	/// Texto con la variación de ticket
+	measure 'Etiqueta var Ticket' =
+			VAR v = [Var % Ticket]
+			VAR ult = MAX ( Compras[anio] )
+			RETURN
+				IF (
+					ISBLANK ( v ),
+					"Sin año anterior para comparar",
+					IF ( v < 0, "▼ ", "▲ " ) & FORMAT ( ABS ( v ), "0.0%" ) & " vs " & ( ult - 1 )
+				)
+		displayFolder: Comparación anual
+		lineageTag: 872282d8-e94e-4b22-a771-1058935300f2
+
+	/// Cambio de proveedores del último año frente a los mismos meses del año anterior
+	measure 'Var % Proveedores' =
+			VAR ult = MAX ( Compras[anio] )
+			VAR mesmax = CALCULATE ( MAX ( Compras[mes] ), Compras[anio] = ult )
+			VAR act = CALCULATE ( [Proveedores], Compras[anio] = ult )
+			VAR ant = CALCULATE ( [Proveedores], Compras[anio] = ult - 1, Compras[mes] <= mesmax )
+			RETURN
+				IF ( NOT ISBLANK ( act ) && NOT ISBLANK ( ant ), DIVIDE ( act - ant, ant ) )
+		formatString: 0.0%
+		displayFolder: Comparación anual
+		lineageTag: 724aea06-5836-49b1-92ca-8573760ceec5
+
+	/// Texto con la variación de proveedores
+	measure 'Etiqueta var Proveedores' =
+			VAR v = [Var % Proveedores]
+			VAR ult = MAX ( Compras[anio] )
+			RETURN
+				IF (
+					ISBLANK ( v ),
+					"Sin año anterior para comparar",
+					IF ( v < 0, "▼ ", "▲ " ) & FORMAT ( ABS ( v ), "0.0%" ) & " vs " & ( ult - 1 )
+				)
+		displayFolder: Comparación anual
+		lineageTag: b79431a6-e796-4506-b76d-82b5a57c1657
+
+	/// Monto de toda la región, sin importar el distrito elegido
+	measure 'Monto regional' =
+			CALCULATE (
+				[Monto],
+				REMOVEFILTERS ( Distritos ),
+				REMOVEFILTERS ( Compras[zona], Compras[distrito], Compras[ubigeo] )
+			)
+		formatString: \S\/ #,0
+		displayFolder: Distrito de Puno
+		lineageTag: 5b0a5c42-dd43-4bdc-8405-ab485ba36179
+
+	/// Qué parte del monto de la región representa la selección
+	measure '% del monto regional' = DIVIDE ( [Monto], [Monto regional] )
+		formatString: 0.0%
+		displayFolder: Distrito de Puno
+		lineageTag: 5bcddd43-f767-41b4-9f40-96fe095697c2
+
+	/// Monto de las entidades del distrito de Puno
+	measure 'Monto distrito de Puno' = CALCULATE ( [Monto], Compras[zona] = "Distrito de Puno" )
+		formatString: \S\/ #,0
+		displayFolder: Distrito de Puno
+		lineageTag: 892d18cd-1911-490c-810b-89e38f7ae953
+
+	/// Peso del distrito de Puno en el monto
+	measure '% distrito de Puno' = DIVIDE ( [Monto distrito de Puno], CALCULATE ( [Monto], REMOVEFILTERS ( Compras[zona] ) ) )
+		formatString: 0.0%
+		displayFolder: Distrito de Puno
+		lineageTag: 6e13685c-e1e1-4b49-b265-20bb521663e1
+
+	/// Peso del distrito de Puno en las órdenes
+	measure '% órdenes distrito de Puno' =
+			DIVIDE (
+				CALCULATE ( [Órdenes], Compras[zona] = "Distrito de Puno" ),
+				CALCULATE ( [Órdenes], REMOVEFILTERS ( Compras[zona] ) )
+			)
+		formatString: 0.0%
+		displayFolder: Distrito de Puno
+		lineageTag: 62a60181-97b9-4eaf-8b2f-be05adcdcfab
+
+	/// Cuántas veces el monto del distrito de Puno supera al del segundo distrito
+	measure 'Veces el segundo distrito' =
+			VAR puno = CALCULATE ( [Monto], Compras[zona] = "Distrito de Puno" )
+			VAR segundo =
+				MAXX (
+					FILTER ( ALL ( Distritos[ubigeo] ), Distritos[ubigeo] <> "210101" ),
+					CALCULATE ( [Monto], REMOVEFILTERS ( Compras[zona] ) )
+				)
+			RETURN
+				DIVIDE ( puno, segundo )
+		formatString: 0.0
+		displayFolder: Distrito de Puno
+		lineageTag: 2ca870bc-dfda-4ecc-9ec8-5ab8fdfa83a9
+
+	/// Parte del monto que se llevan empresas con domicilio en Puno
+	measure '% monto a empresas de Puno' = DIVIDE ( CALCULATE ( [Monto], Compras[origen_proveedor] = "Puno" ), [Monto] )
+		formatString: 0.0%
+		displayFolder: Distrito de Puno
+		lineageTag: ad5a6cb4-5a1b-427d-ad52-487f38cb598a
+
+	/// Explicación de la tarjeta Monto
+	measure 'Ayuda monto' =
+			"Todo el dinero que pagaron las entidades públicas por sus compras en los Catálogos Electrónicos de Perú Compras (con IGV). Equivale a unos "
+				& "S/ " & FORMAT ( [Monto por mes], "#,0" ) & " al mes."
+		displayFolder: Textos de ayuda
+		lineageTag: 64aa1b57-508e-40be-8f23-9e831347c65a
+
+	/// Explicación de la tarjeta Órdenes
+	measure 'Ayuda órdenes' =
+			"Cada orden es una compra concreta: una entidad le pide a una empresa productos del catálogo. Son unas "
+				& FORMAT ( DIVIDE ( [Órdenes], [Meses con compras] ), "#,0" ) & " órdenes al mes, emitidas por "
+				& FORMAT ( [Entidades], "#,0" ) & " entidades."
+		displayFolder: Textos de ayuda
+		lineageTag: 6f79112a-a03a-465d-950d-b2c882142bdf
+
+	/// Explicación de la tarjeta Ticket promedio
+	measure 'Ayuda ticket' =
+			"Lo que cuesta en promedio una orden. Unas pocas compras muy grandes lo suben: la orden típica (mediana) es de "
+				& "S/ " & FORMAT ( [Orden típica], "#,0" ) & ", es decir, la mitad de las órdenes cuesta menos que eso."
+		displayFolder: Textos de ayuda
+		lineageTag: bef71faf-6e65-4336-aacd-1148e06c1999
+
+	/// Explicación de la tarjeta Proveedores
+	measure 'Ayuda proveedores' =
+			"Empresas distintas que recibieron al menos una orden. Las empresas con domicilio en Puno se llevan solo el "
+				& FORMAT ( [% monto a empresas de Puno], "0.0%" ) & " del dinero."
+		displayFolder: Textos de ayuda
+		lineageTag: 488d832c-897f-4cf8-84e3-ab7182874f9e
+
+	/// Frase resumen sobre el distrito de Puno
+	measure 'Titular distrito de Puno' =
+			VAR segundo =
+				TOPN (
+					1,
+					FILTER ( ALL ( Distritos[ubigeo], Distritos[distrito] ), Distritos[ubigeo] <> "210101" ),
+					CALCULATE ( [Monto], REMOVEFILTERS ( Compras[zona] ) ), DESC
+				)
+			RETURN
+				"El distrito de Puno concentra el " & FORMAT ( [% distrito de Puno], "0.0%" )
+					& " del monto de la región: " & FORMAT ( [Veces el segundo distrito], "0.0" )
+					& " veces lo que compra " & MAXX ( segundo, Distritos[distrito] ) & ", el segundo."
+		displayFolder: Textos de ayuda
+		lineageTag: e88f87cc-e191-4b5d-bfd3-666b7ea205f9
+
+	/// Monto, órdenes o empresas según el botón elegido
+	measure Valor =
+			SWITCH (
+				SELECTEDVALUE ( 'Métrica'[Métrica], "Monto" ),
+				"Órdenes", [Órdenes],
+				"Empresas", [Proveedores],
+				[Monto]
+			)
+		displayFolder: Selector
+		lineageTag: 447df900-0762-4ff5-b580-cb405b8f9add
+
+		formatStringDefinition = IF ( SELECTEDVALUE ( 'Métrica'[Métrica], "Monto" ) = "Monto", "\S\/ #,0", "#,0" )
+
+	/// La métrica elegida, acumulada desde enero dentro de cada año
+	measure 'Valor acumulado' =
+			VAR m = MAX ( Compras[mes] )
+			RETURN
+				CALCULATE ( [Valor], Compras[mes] <= m, REMOVEFILTERS ( Compras[mes_nombre] ) )
+		displayFolder: Selector
+		lineageTag: 6afe15b0-0b0e-4654-a72d-df05e88eccbe
+
+		formatStringDefinition = IF ( SELECTEDVALUE ( 'Métrica'[Métrica], "Monto" ) = "Monto", "\S\/ #,0", "#,0" )
+
+	/// Parte del total visible que representa el elemento
+	measure '% del total' = DIVIDE ( [Valor], CALCULATE ( [Valor], ALLSELECTED () ) )
+		formatString: 0.0%
+		displayFolder: Selector
+		lineageTag: f909d18f-6c45-4aa0-a0f0-0f650c48cff9
+
+	/// Título dinámico según la métrica elegida
+	measure 'Título evolución' = "¿Cómo evoluciona " & IF ( SELECTEDVALUE ( 'Métrica'[Métrica], "Monto" ) = "Monto", "el gasto", "el número de " & LOWER ( SELECTEDVALUE ( 'Métrica'[Métrica], "Monto" ) ) ) & "?"
+		displayFolder: Textos de ayuda
+		lineageTag: 07151085-243d-4a53-be2c-ebb3c80348e3
+
+	/// Título dinámico según la métrica elegida
+	measure 'Título rubros' = "Rubros con más " & LOWER ( SELECTEDVALUE ( 'Métrica'[Métrica], "Monto" ) )
+		displayFolder: Textos de ayuda
+		lineageTag: 551c88c6-b00d-4074-93c5-17601ce8b67e
+
+	/// Título dinámico según la métrica elegida
+	measure 'Título sectores' = SELECTEDVALUE ( 'Métrica'[Métrica], "Monto" ) & " por sector de la entidad"
+		displayFolder: Textos de ayuda
+		lineageTag: c2b76fe9-4c9d-4a1a-9714-cc80882ba8a1
+
+	/// Título dinámico según la métrica elegida
+	measure 'Título distritos' = "Distritos con más " & LOWER ( SELECTEDVALUE ( 'Métrica'[Métrica], "Monto" ) )
+		displayFolder: Textos de ayuda
+		lineageTag: d669612e-1d95-418b-ac8f-4cca8ca23bd7
+
+	/// Título dinámico según la métrica elegida
+	measure 'Título mapa' = SELECTEDVALUE ( 'Métrica'[Métrica], "Monto" ) & " por distrito"
+		displayFolder: Textos de ayuda
+		lineageTag: 767d7ceb-684a-4457-8f15-e0c121d8277b
+
+	/// Parte del monto que se llevan las 10 empresas que más venden
+	measure 'Concentración top 10' =
+			DIVIDE (
+				SUMX ( TOPN ( 10, VALUES ( Compras[ruc_proveedor] ), [Monto] ), [Monto] ),
+				[Monto]
+			)
+		formatString: 0.0%
+		displayFolder: Proveedores
+		lineageTag: b6ed03be-af97-41cf-b106-9d11bde35143
+
+	/// Cuántas empresas, de mayor a menor, juntan el 80 % del monto (Pareto)
+	measure 'Empresas para el 80%' =
+			VAR t = ADDCOLUMNS ( VALUES ( Compras[ruc_proveedor] ), "@m", [Monto] )
+			VAR tot = SUMX ( t, [@m] )
+			VAR t2 =
+				ADDCOLUMNS ( t, "@antes", VAR m = [@m] RETURN SUMX ( FILTER ( t, [@m] > m ), [@m] ) )
+			RETURN
+				COUNTROWS ( FILTER ( t2, [@antes] < 0.8 * tot ) )
+		formatString: #,0
+		displayFolder: Proveedores
+		lineageTag: 53cfa1c8-5ba5-4e57-b955-fab2ee5d0b42
+
+	/// Texto: empresas que hacen el 80 % del monto
+	measure 'Etiqueta Pareto' =
+			FORMAT ( [Empresas para el 80%], "#,0" ) & " de " & FORMAT ( [Proveedores], "#,0" ) & " ("
+				& FORMAT ( DIVIDE ( [Empresas para el 80%], [Proveedores] ), "0.0%" ) & ")"
+		displayFolder: Proveedores
+		lineageTag: 5e8dceb4-03e9-4cd5-ac1e-a339171bd00c
+
+	/// Parte del monto que concentra la entidad que más compra
+	measure 'Peso entidad principal' = DIVIDE ( MAXX ( VALUES ( Compras[ruc_entidad] ), [Monto] ), [Monto] )
+		formatString: 0.0%
+		displayFolder: Entidades
+		lineageTag: a59792d3-edba-4736-a959-3e151ad8824d
+
+	/// Monto promedio comprado por cada entidad
+	measure 'Monto por entidad' = DIVIDE ( [Monto], [Entidades] )
+		formatString: \S\/ #,0
+		displayFolder: Entidades
+		lineageTag: ddc20154-53d6-4eca-abf1-8b66268aec73
+
+	/// Distritos con al menos una entidad que compró
+	measure 'Distritos con compras' = DISTINCTCOUNT ( Compras[ubigeo] )
+		formatString: #,0
+		displayFolder: Básicas
+		lineageTag: 8e730771-69cc-4a31-ba69-72eff28f6616
+
+	/// Parte de las órdenes que cae en cada rango
+	measure '% de órdenes' = DIVIDE ( [Órdenes], CALCULATE ( [Órdenes], ALLSELECTED ( Compras[rango_monto] ) ) )
+		formatString: 0.0%
+		displayFolder: Exploración
+		lineageTag: 44c7d8fe-ae4d-4f17-8c68-1dc75a224ce7
+
+	/// Parte del monto que cae en cada rango
+	measure '% del monto' = DIVIDE ( [Monto], CALCULATE ( [Monto], ALLSELECTED ( Compras[rango_monto] ) ) )
+		formatString: 0.0%
+		displayFolder: Exploración
+		lineageTag: ceba91bb-fb81-4be9-97ee-dab6b07e10bf
+
+	/// Media del monto por orden
+	measure 'Media por orden' = AVERAGE ( Compras[total] )
+		formatString: \S\/ #,0
+		displayFolder: Exploración
+		lineageTag: d7a1ff6e-4efd-4d3d-aa43-ef195061813c
+
+	/// Desviación estándar del monto por orden
+	measure 'Desviación estándar' = STDEV.P ( Compras[total] )
+		formatString: \S\/ #,0
+		displayFolder: Exploración
+		lineageTag: 361f9615-de44-4430-a021-11a2991e5e9d
+
+	/// Orden más pequeña
+	measure Mínimo = MIN ( Compras[total] )
+		formatString: \S\/ #,0.00
+		displayFolder: Exploración
+		lineageTag: 8de5070e-eb8f-4128-a45a-60de7627a15f
+
+	/// Orden más grande
+	measure Máximo = MAX ( Compras[total] )
+		formatString: \S\/ #,0
+		displayFolder: Exploración
+		lineageTag: 6fc7c312-5d53-4803-9052-177c878c043d
+
+	/// Diferencia entre el percentil 75 y el 25: dónde está la mitad central de las órdenes
+	measure 'Rango intercuartílico' = [Percentil 75] - [Percentil 25]
+		formatString: \S\/ #,0
+		displayFolder: Exploración
+		lineageTag: 556dff52-2d27-42e4-9687-cc0325673233
+
+	/// Desviación estándar entre la media: más de 100 % indica mucha dispersión
+	measure 'Coef. de variación' = DIVIDE ( [Desviación estándar], [Media por orden] )
+		formatString: 0.0%
+		displayFolder: Exploración
+		lineageTag: 6d1ead99-42c5-4a87-a2ae-911cc5ec796d
+
+	/// Primer cuartil
+	measure 'Percentil 25' = PERCENTILE.INC ( Compras[total], 0.25 )
+		formatString: \S\/ #,0
+		displayFolder: Exploración
+		lineageTag: d9411600-e6ed-487a-b969-646f9cb47f3f
+
+	/// Explica en una frase cómo se reparte el monto de las órdenes
+	measure 'Lectura distribución' =
+			"La media (S/ " & FORMAT ( [Media por orden], "#,0" ) & ") es "
+				& FORMAT ( DIVIDE ( [Media por orden], [Orden típica] ), "0.0" )
+				& " veces la mediana (S/ " & FORMAT ( [Orden típica], "#,0" )
+				& "): hay muchas compras pequeñas y unas pocas muy grandes que suben el promedio."
+		displayFolder: Exploración
+		lineageTag: 4f281ac7-6507-43dc-b1b6-f7acb0bfe298
+
+	/// Tercer cuartil
+	measure 'Percentil 75' = PERCENTILE.INC ( Compras[total], 0.75 )
+		formatString: \S\/ #,0
+		displayFolder: Exploración
+		lineageTag: b9b2c712-eb43-4aed-90d4-98ff476b1e43
+
+	column orden
+		dataType: string
+		lineageTag: d182ce50-b52f-4612-86e2-3759fdf2050e
+		summarizeBy: none
+		sourceColumn: orden
+
+	column fecha
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 6f9920c3-e0ad-4fb2-8137-a9765856c70f
+		summarizeBy: none
+		sourceColumn: fecha
+
+	column anio
+		dataType: int64
+		formatString: 0
+		lineageTag: 2c392a3d-8b6c-4372-a230-8ed6a6156d42
+		summarizeBy: none
+		sourceColumn: anio
+
+	column mes
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e0dcb327-7e63-4899-be26-d5087f35aa1f
+		summarizeBy: none
+		sourceColumn: mes
+
+	column mes_nombre
+		dataType: string
+		lineageTag: 11dcc968-b47e-47d5-8682-5166a3587ca9
+		summarizeBy: none
+		sourceColumn: mes_nombre
+		sortByColumn: mes
+
+	column periodo
+		dataType: dateTime
+		formatString: mmm yyyy
+		lineageTag: 75fdff4f-b81e-4b91-9661-ec137554eaec
+		summarizeBy: none
+		sourceColumn: periodo
+
+	column ruc_entidad
+		dataType: string
+		lineageTag: c6f9995e-1790-4d43-a0bf-8d77ed70d7a0
+		summarizeBy: none
+		sourceColumn: ruc_entidad
+
+	column entidad
+		dataType: string
+		lineageTag: 42bb06db-ef13-4d4c-8fcd-c103ede98f19
+		summarizeBy: none
+		sourceColumn: entidad
+
+	column sector
+		dataType: string
+		lineageTag: 7f14de75-b062-47a7-aeac-008c4a7a4a61
+		summarizeBy: none
+		sourceColumn: sector
+
+	column provincia
+		dataType: string
+		lineageTag: 99c09d34-0c1e-4059-968f-18baeea00d3e
+		summarizeBy: none
+		sourceColumn: provincia
+
+	column distrito
+		dataType: string
+		lineageTag: 764f967d-ec98-49e1-bb13-98c996c47307
+		summarizeBy: none
+		sourceColumn: distrito
+
+	column ubigeo
+		dataType: string
+		isHidden
+		lineageTag: 8c70479c-4c26-451a-b3ca-e98662a96fbc
+		summarizeBy: none
+		sourceColumn: ubigeo
+
+	column zona
+		dataType: string
+		lineageTag: f3d10810-b2e1-42f4-9082-c7aa4633ca74
+		summarizeBy: none
+		sourceColumn: zona
+
+	column ruc_proveedor
+		dataType: string
+		lineageTag: 886f8982-98e8-4fb0-95aa-ca243ab664fa
+		summarizeBy: none
+		sourceColumn: ruc_proveedor
+
+	column proveedor
+		dataType: string
+		lineageTag: fde53283-4ae5-4bf5-9cfe-56262e4f6379
+		summarizeBy: none
+		sourceColumn: proveedor
+
+	column tipo_empresa
+		dataType: string
+		lineageTag: bef58927-12ee-4497-8cae-94beb0f8bf50
+		summarizeBy: none
+		sourceColumn: tipo_empresa
+
+	column origen_proveedor
+		dataType: string
+		lineageTag: fe829575-b0ed-44ac-8a66-c4637b810fdb
+		summarizeBy: none
+		sourceColumn: origen_proveedor
+
+	column rubro
+		dataType: string
+		lineageTag: 1a48003c-e0ae-415a-b071-9463bd5e3310
+		summarizeBy: none
+		sourceColumn: rubro
+
+	column tipo_procedimiento
+		dataType: string
+		lineageTag: 681154a3-d90f-4ad7-adc5-5e258365771a
+		summarizeBy: none
+		sourceColumn: tipo_procedimiento
+
+	column estado
+		dataType: string
+		lineageTag: 3aa6b394-0fc5-4191-97c2-a9d962061ba5
+		summarizeBy: none
+		sourceColumn: estado
+
+	column rango_monto
+		dataType: string
+		lineageTag: cbd13aa1-c792-4e95-b2cd-4d995c98c593
+		summarizeBy: none
+		sourceColumn: rango_monto
+
+	column total
+		dataType: double
+		formatString: \S\/ #,0.00
+		lineageTag: 8cb8702f-3974-4d91-b7cb-8223454b2d69
+		summarizeBy: sum
+		sourceColumn: total
+
+	column dia_num
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e4be12dc-489e-4ee1-953e-08fbce839c98
+		summarizeBy: none
+		sourceColumn: dia_num
+
+	column dia_semana
+		dataType: string
+		lineageTag: 79110e55-4cfd-41b9-b736-4ee7807c7fce
+		summarizeBy: none
+		sourceColumn: dia_semana
+		sortByColumn: dia_num
+
+	partition Compras = m
+		mode: import
+		source =
+				let
+					Origen = Csv.Document(File.Contents(CarpetaDatos & "compras.csv"), [Delimiter = ",", Columns = 24, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+					Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+					Tipos = Table.TransformColumnTypes(Encabezados, {{"orden", type text}, {"fecha", type date}, {"anio", Int64.Type}, {"mes", Int64.Type}, {"mes_nombre", type text}, {"periodo", type date}, {"ruc_entidad", type text}, {"entidad", type text}, {"sector", type text}, {"provincia", type text}, {"distrito", type text}, {"ubigeo", type text}, {"zona", type text}, {"ruc_proveedor", type text}, {"proveedor", type text}, {"tipo_empresa", type text}, {"origen_proveedor", type text}, {"rubro", type text}, {"tipo_procedimiento", type text}, {"estado", type text}, {"rango_monto", type text}, {"total", type number}, {"dia_num", Int64.Type}, {"dia_semana", type text}}, "en-US")
+				in
+					Tipos
+

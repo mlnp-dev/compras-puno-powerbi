@@ -1,0 +1,122 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/report/3.3.0/schema.json",
+  "themeCollection": {
+    "baseTheme": {
+      "name": "Fluent2-CY26SU10",
+      "reportVersionAtImport": {
+        "visual": "2.11.0",
+        "report": "3.4.0",
+        "page": "2.3.1"
+      },
+      "type": "SharedResources"
+    },
+    "customTheme": {
+      "name": "Plantilla-d50dc7df.json",
+      "reportVersionAtImport": {
+        "visual": "2.11.0",
+        "report": "3.4.0",
+        "page": "2.3.1"
+      },
+      "type": "RegisteredResources"
+    }
+  },
+  "objects": {
+    "outspacePane": [
+      {
+        "properties": {
+          "expanded": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "resourcePackages": [
+    {
+      "name": "SharedResources",
+      "type": "SharedResources",
+      "items": [
+        {
+          "name": "Fluent2-CY26SU10",
+          "path": "BaseThemes/Fluent2-CY26SU10.json",
+          "type": "BaseTheme"
+        }
+      ]
+    },
+    {
+      "name": "RegisteredResources",
+      "type": "RegisteredResources",
+      "items": [
+        {
+          "name": "banda226066686366769.png",
+          "path": "banda226066686366769.png",
+          "type": "Image"
+        },
+        {
+          "name": "fondo_tooltip278223549784412.png",
+          "path": "fondo_tooltip278223549784412.png",
+          "type": "Image"
+        },
+        {
+          "name": "fondo156819963223151.png",
+          "path": "fondo156819963223151.png",
+          "type": "Image"
+        },
+        {
+          "name": "logo_epg180435091415808.png",
+          "path": "logo_epg180435091415808.png",
+          "type": "Image"
+        },
+        {
+          "name": "logo_facultad250657308683689.png",
+          "path": "logo_facultad250657308683689.png",
+          "type": "Image"
+        },
+        {
+          "name": "logo_puno173130314737500.png",
+          "path": "logo_puno173130314737500.png",
+          "type": "Image"
+        },
+        {
+          "name": "ola_azul267428407201835.png",
+          "path": "ola_azul267428407201835.png",
+          "type": "Image"
+        },
+        {
+          "name": "ola_indigo1773882474434.png",
+          "path": "ola_indigo1773882474434.png",
+          "type": "Image"
+        },
+        {
+          "name": "ola_marino165203975977777.png",
+          "path": "ola_marino165203975977777.png",
+          "type": "Image"
+        },
+        {
+          "name": "ola_teal218451341695427.png",
+          "path": "ola_teal218451341695427.png",
+          "type": "Image"
+        },
+        {
+          "name": "Plantilla-d50dc7df.json",
+          "path": "Plantilla-d50dc7df.json",
+          "type": "CustomTheme"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "hideVisualContainerHeader": true,
+    "useStylableVisualContainerHeader": true,
+    "exportDataMode": "AllowSummarized",
+    "defaultFilterActionIsDataFilter": true,
+    "defaultDrillFilterOtherVisuals": true,
+    "allowChangeFilterTypes": true,
+    "useEnhancedTooltips": true,
+    "useDefaultAggregateDisplayName": true
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "Plantilla-d50dc7df.json",
+  "dataColors": [
+    "#2F6FED",
+    "#2BB39B",
+    "#14213D",
+    "#9CC3FF",
+    "#F07B3F",
+    "#6366F1",
+    "#F2B544",
+    "#94A3B8"
+  ],
+  "foreground": "#1E293B",
+  "foregroundNeutralSecondary": "#64748B",
+  "background": "#FFFFFF",
+  "tableAccent": "#2BB39B",
+  "good": "#2BB39B",
+  "bad": "#E5484D",
+  "neutral": "#F2B544",
+  "textClasses": {
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 12,
+      "color": "#1E293B"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 9,
+      "color": "#64748B"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Black",
+      "fontSize": 22,
+      "color": "#1E293B"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 12,
+      "color": "#1E293B"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "visualHeader": [
+          {
+            "show": false
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+table Métrica
+	lineageTag: 93a700e7-7b02-4c20-bcee-51bb0d1fe184
+
+	column Métrica
+		dataType: string
+		lineageTag: e8057c12-b185-4452-a3cf-ffce091b6d80
+		summarizeBy: none
+		sourceColumn: [Métrica]
+		sortByColumn: Orden
+
+	column Orden
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 219ec900-d973-4820-820c-88512a299570
+		summarizeBy: none
+		sourceColumn: [Orden]
+
+	partition Métrica = calculated
+		mode: import
+		source = DATATABLE ( "Métrica", STRING, "Orden", INTEGER, { { "Monto", 1 }, { "Órdenes", 2 }, { "Empresas", 3 } } )
+

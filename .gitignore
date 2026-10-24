@@ -1,0 +1,19 @@
+# Solo se versiona el proyecto de Power BI, sus datos y los scripts que lo generan.
+/*
+!/.gitignore
+!/README.md
+!/powerbi/
+!/scripts/
+!/data/
+!/capturas/
+
+# datos crudos de Perú Compras (pesados, se descargan de la fuente) y copia en Excel
+/data/raw/
+/data/*.xlsx
+
+# solo las capturas de Power BI (las del Shiny están en su propio repositorio)
+/capturas/*
+!/capturas/powerbi/
+
+# configuración local de Power BI Desktop
+powerbi/**/.pbi/localSettings.json
